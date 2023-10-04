@@ -16,13 +16,16 @@ It calculates pixel changes and quantifies the overall motion, which cannot be q
 
 #### Step3: Build an environment using the yaml file
 
+In Anacnda prompt
 ```
   conda env create -f <path/to/environment.yml>
 ```
 
 #### Step4: Start PixAnalyzer
 
+In Anacnda prompt
 ```
+  conda acitate pixanalyzer
   cd PixAnalyzer # Move to PixAnalyzer directory
   python -m pixanalyzer
 ```
