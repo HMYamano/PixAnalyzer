@@ -1,5 +1,6 @@
 # PixAnalyzer
-![Logo](img/logo.png)
+<!-- ![Logo](img/logo.png) -->
+<img src="img/logo.png" width="30%">
 
 PixAnalyzer is a tool for quantifying the motion of objects.
 It calculates pixel changes and quantifies the overall motion, which cannot be quantified by tracking or object recognition.
