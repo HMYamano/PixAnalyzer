@@ -11,7 +11,7 @@ import sys
 import time
 from io import BytesIO
 import tempfile
-from pixanalyzer.threshold import select_threshold
+import libs
 
 
 # グラフの描画
