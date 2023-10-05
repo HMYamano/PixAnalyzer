@@ -14,13 +14,14 @@ import tempfile
 import libs
 
 
-# グラフの描画
+# Drawing graph
 def draw_and_show_plot(window, fig, key):
     with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as tmpfile:
         tmp_filename = tmpfile.name
     fig.savefig(tmp_filename, bbox_inches='tight', pad_inches=0.1, dpi=100)
     window[key].update(filename=tmp_filename)
     
+# 
 def apply_threshold(image, lower_threshold, upper_threshold):
     # gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     mask = cv2.inRange(image, lower_threshold, upper_threshold)
@@ -29,17 +30,18 @@ def apply_threshold(image, lower_threshold, upper_threshold):
 
 def main():
     layout = [
-        [sg.Text('Movement Analysis Software')],
-        [sg.Button('Start')], 
+        # [sg.Text('PixAnalyzer')],
+        [sg.Button('Analysis Start')], 
         # [sg.Output(size=(80, 10))],
-        [sg.ProgressBar(max_value=100, orientation='h', size=(30, 20), key='-PROGRESS-'),
+        [sg.Text("Remaining time"),
+        sg.ProgressBar(max_value=100, orientation='h', size=(30, 20), key='-PROGRESS-'),
         sg.Text('', key='-TIME-', size=(30, 1))],
         [sg.Image(filename='', key='-IMAGE1-')],
         # [sg.Image(filename='', key='-IMAGE4-')],
         [sg.Button('Exit')]
     ]
 
-    window = sg.Window('Video Analysis', layout, resizable=True)
+    window = sg.Window('PixAnalyzer', layout, resizable=True)
 
     while True:
         
@@ -48,7 +50,7 @@ def main():
         if event == sg.WIN_CLOSED or event == 'Exit':
             break
         
-        if event == 'Start':
+        if event == 'Analysis Start':
             # ファイルダイアログで動画ファイルを選択
             root = Tk()
             root.withdraw()
