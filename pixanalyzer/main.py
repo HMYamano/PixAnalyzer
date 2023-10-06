@@ -12,13 +12,15 @@ import pandas as pd
 import PySimpleGUI as sg
 import seaborn as sns
 from tqdm import tqdm
+# import libs
 
 if __name__ == "__main__":
     # 直接Pythonファイルを実行した場合
-    import libs
+    import threshold as thresh
 else:
-    # モジュールとして実行した場合
-    from . import libs
+
+    # from .libs import threshold
+    from . import threshold as thresh
 
 
 # Drawing graph
@@ -121,7 +123,7 @@ def main():
 
             # 明るさのthresholdを選択
             # cropped_img = gray[roi[1]:roi[1] + roi[3], roi[0]:roi[0] + roi[2]]
-            lower_th, upper_th = select_threshold(first_frame_cropped)
+            lower_th, upper_th = thresh.select_threshold(first_frame_cropped)
 
             # 保存
             th_cropped = apply_threshold(first_frame_cropped, lower_th, upper_th)
