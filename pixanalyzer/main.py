@@ -13,7 +13,12 @@ import PySimpleGUI as sg
 import seaborn as sns
 from tqdm import tqdm
 
-import libs
+if __name__ == "__main__":
+    # 直接Pythonファイルを実行した場合
+    import libs
+else:
+    # モジュールとして実行した場合
+    from . import libs
 
 
 # Drawing graph

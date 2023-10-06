@@ -63,4 +63,8 @@ setup(
         "Programming Language :: Python :: 3.13",
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
+    entry_points={
+        'console_scripts': [
+            'pixanalyzer = pixanalyzer.main:main',
+        ],},
 )
