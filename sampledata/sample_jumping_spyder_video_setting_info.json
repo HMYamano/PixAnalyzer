@@ -1,0 +1,18 @@
+{
+    "ROI": [
+        [
+            106,
+            9
+        ],
+        [
+            1083,
+            1022
+        ]
+    ],
+    "Threshold": [
+        0,
+        80
+    ],
+    "Video path": "/Users/tankororin/Documents/GitHub/PixAnalyzer/sampledata/sample_jumping_spyder_video.mp4",
+    "Analysis date": "2023-10-11 22:46:03"
+}
