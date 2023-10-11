@@ -12,6 +12,8 @@ import pandas as pd
 import PySimpleGUI as sg
 import seaborn as sns
 from tqdm import tqdm
+import json
+import datetime
 # import libs
 
 if __name__ == "__main__":
@@ -297,6 +299,19 @@ def main():
             # 動画全体のCSVの保存
             csv_path = os.path.join(directory, f"{file_name}_accumulated_diff.csv")
             np.savetxt(csv_path, accumulated_diff, delimiter=",", fmt="%f")
+            
+            # Setting information
+            now = datetime.datetime.now()
+            set_info = {
+                "ROI": (rectangle1, rectangle2),
+                "Threshold": (lower_th, upper_th),
+                "Video path": video_path,
+                "Analysis date": now.strftime('%Y-%m-%d %H:%M:%S'),
+            }
+            result_json_path = os.path.join(directory, f"{file_name}_setting_info.json")
+            # system infoの保存
+            with open(result_json_path, "w") as f:
+                json.dump(set_info, f, indent=4)
 
             print("Complete!!!!")
 
