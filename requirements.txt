@@ -37,5 +37,5 @@ tqdm==4.66.1
 twine==4.0.2
 tzdata==2023.3
 urllib3==2.0.6
-wheel==0.37.1
+wheel==0.38.1
 zipp==3.17.0
