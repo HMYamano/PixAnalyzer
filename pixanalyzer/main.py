@@ -44,7 +44,7 @@ def apply_threshold(image, lower_threshold, upper_threshold):
 def main():
     layout = [
         # [sg.Text('PixAnalyzer')],
-        [sg.Button("Analysis Start")],
+        [sg.Button("Start Analysis")],
         # [sg.Output(size=(80, 10))],
         [
             sg.Text("Remaining time"),
@@ -66,7 +66,7 @@ def main():
         if event == sg.WIN_CLOSED or event == "Exit":
             break
 
-        if event == "Analysis Start":
+        if event == "Start Analysis":
             # ファイルダイアログで動画ファイルを選択
             root = Tk()
             root.withdraw()
@@ -272,9 +272,9 @@ def main():
             fig3.savefig(gp3_path)
             fig4.savefig(gp4_path)
 
-            # Export data to Excel
-            excel_file_name = os.path.join(
-                directory, f"{file_name}_pixel_intensities.xlsx"
+            # Export data to CSV
+            results_file_name = os.path.join(
+                directory, f"{file_name}_pixel_intensities.csv"
             )
 
             # Create dataframe
@@ -286,15 +286,17 @@ def main():
                 "Delta Pixel Intensity (%)": d_sum[:range_frames] * 100,
             }
             df = pd.DataFrame(data)
+            
+            df.to_csv(results_file_name)
 
-            with pd.ExcelWriter(excel_file_name) as writer:
-                df.to_excel(
-                    writer,
-                    index=False,
-                    sheet_name="Delta Pixel Intensity",
-                    startrow=0,
-                    startcol=0,
-                )
+            # with pd.ExcelWriter(excel_file_name) as writer:
+            #     df.to_excel(
+            #         writer,
+            #         index=False,
+            #         sheet_name="Delta Pixel Intensity",
+            #         startrow=0,
+            #         startcol=0,
+            #     )
 
             # 動画全体のCSVの保存
             csv_path = os.path.join(directory, f"{file_name}_accumulated_diff.csv")
