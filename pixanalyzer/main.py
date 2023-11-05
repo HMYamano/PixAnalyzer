@@ -1,3 +1,5 @@
+import datetime
+import json
 import os
 import sys
 import tempfile
@@ -12,40 +14,55 @@ import pandas as pd
 import PySimpleGUI as sg
 import seaborn as sns
 from tqdm import tqdm
-import json
-import datetime
-# import libs
+
+# Import required libraries
+# (Original comment was 'import libs')
 
 if __name__ == "__main__":
-    # 直接Pythonファイルを実行した場合
+    # Execute when the script is run directly
     import threshold as thresh
 else:
-
-    # from .libs import threshold
+    # Import threshold module when the script is used as a module
     from . import threshold as thresh
 
 
-# Drawing graph
+# Function to display a plot in the GUI
 def draw_and_show_plot(window, fig, key):
+    """Display a matplotlib plot in a PySimpleGUI window.
+
+    Args:
+        window (sg.Window): The PySimpleGUI window object.
+        fig (matplotlib.figure.Figure): The matplotlib figure to display.
+        key (str): The key associated with the image element in the PySimpleGUI layout.
+    """
     with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmpfile:
         tmp_filename = tmpfile.name
     fig.savefig(tmp_filename, bbox_inches="tight", pad_inches=0.1, dpi=100)
     window[key].update(filename=tmp_filename)
 
 
-#
+# Function to apply thresholding to an image
 def apply_threshold(image, lower_threshold, upper_threshold):
-    # gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    """Apply thresholding to an image.
+
+    Args:
+        image (np.array): The input image.
+        lower_threshold (int): The lower threshold value.
+        upper_threshold (int): The upper threshold value.
+
+    Returns:
+        np.array: The thresholded image.
+    """
     mask = cv2.inRange(image, lower_threshold, upper_threshold)
     threshold_image = cv2.bitwise_and(image, image, mask=mask)
     return threshold_image
 
 
+# Main function of the script
 def main():
+    """Main function to run the video analysis GUI."""
     layout = [
-        # [sg.Text('PixAnalyzer')],
         [sg.Button("Start Analysis")],
-        # [sg.Output(size=(80, 10))],
         [
             sg.Text("Remaining time"),
             sg.ProgressBar(
@@ -54,7 +71,6 @@ def main():
             sg.Text("", key="-TIME-", size=(30, 1)),
         ],
         [sg.Image(filename="", key="-IMAGE1-")],
-        # [sg.Image(filename='', key='-IMAGE4-')],
         [sg.Button("Exit")],
     ]
 
@@ -67,7 +83,7 @@ def main():
             break
 
         if event == "Start Analysis":
-            # ファイルダイアログで動画ファイルを選択
+            # File dialog to select a video file
             root = Tk()
             root.withdraw()
             video_path = filedialog.askopenfilename(
@@ -79,10 +95,10 @@ def main():
                 sys.exit()
             print("Start!!!!")
 
-            # 動画ファイルの読み込み
+            # Load the video file
             cap = cv2.VideoCapture(video_path)
 
-            # 最初のフレームの読み込み
+            # Read the first frame
             ret, first_frame = cap.read()
             if not ret:
                 print("Cannot read video file")
@@ -90,10 +106,10 @@ def main():
                 window.close()
                 exit()
 
-            # グレースケールに変換
+            # Convert to grayscale
             first_frame_gray = cv2.cvtColor(first_frame, cv2.COLOR_BGR2GRAY)
 
-            # GUIでROIを選択
+            # GUI to select ROI (Region of Interest)
             roi = cv2.selectROI(
                 "Select ROI", first_frame, fromCenter=False, showCrosshair=True
             )
@@ -104,12 +120,11 @@ def main():
                 cap.release()
                 continue
 
-            # 被験者が選択した範囲を切り出す
+            # Crop the selected region from the first frame
             first_frame_cropped = first_frame_gray[
                 roi[1] : roi[1] + roi[3], roi[0] : roi[0] + roi[2]
             ]
             roi_draw_image = first_frame.copy()
-            # print((int(roi[1]), int(roi[3])), (int(roi[0]), int(roi[2])))
             rectangle1 = (int(roi[0]), int(roi[1]))
             rectangle2 = (int(roi[0] + roi[2]), int(roi[1] + roi[3]))
             print("ROI", rectangle1, rectangle2)
@@ -117,53 +132,44 @@ def main():
                 roi_draw_image, rectangle1, rectangle2, (0, 0, 255), thickness=10
             )
 
-            # 切り出した範囲の画像を保存
+            # Save the image with the selected ROI
             directory, file_name_with_extension = os.path.split(video_path)
             file_name, _ = os.path.splitext(file_name_with_extension)
             cropped_img_path = os.path.join(directory, f"{file_name}_croparea_draw.png")
             cv2.imwrite(cropped_img_path, roi_draw_image)
 
-            # 明るさのthresholdを選択
-            # cropped_img = gray[roi[1]:roi[1] + roi[3], roi[0]:roi[0] + roi[2]]
+            # Select the brightness threshold
             lower_th, upper_th = thresh.select_threshold(first_frame_cropped)
 
-            # 保存
+            # Apply the threshold and save the result
             th_cropped = apply_threshold(first_frame_cropped, lower_th, upper_th)
             cropped_th_img_path = os.path.join(
                 directory, f"{file_name}_crop_threshold.png"
             )
             cv2.imwrite(cropped_th_img_path, th_cropped)
 
-            # Initialize the list to store sum of pixel intensities for each frame
+            # Initialize a list to store sum of pixel intensities for each frame
             sum_intensities = []
 
-            # 動画ファイルのプロパティを取得
+            # Get properties of the video file
             fps = int(cap.get(cv2.CAP_PROP_FPS))
             total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
+            # Setup for output video with differences
             output_path = os.path.join(directory, f"{file_name}_difference_video.mp4")
             fourcc = cv2.VideoWriter_fourcc(*"mp4v")
             out = cv2.VideoWriter(
                 output_path, fourcc, fps, (roi[2], roi[3]), isColor=False
             )
 
-            # prev_frame = first_frame_cropped
+            # Initialize variables for processing frames
             prev_frame = apply_threshold(first_frame_cropped, lower_th, upper_th)
-            # prev_edges = cv2.Canny(first_frame_cropped, 50, 150)
-
-            # cv2.imshow("window", prev_edges)
-
-            # tqdmで進捗バーを表示しながらループ処理
-            total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-
-            # 動画全体の差分を累積するマトリックスを初期化
             accumulated_diff = np.zeros_like(first_frame_cropped, dtype=np.float64)
 
-            # タイムスタンプの記録
+            # Record start time for progress estimation
             start_time = time.time()
 
             for i in range(total_frames - 1):
-                # print(i)
                 window["-PROGRESS-"].update_bar((i + 1) * 100 / total_frames)
                 ret, frame = cap.read()
                 if not ret:
@@ -171,36 +177,16 @@ def main():
                 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
                 cropped = gray[roi[1] : roi[1] + roi[3], roi[0] : roi[0] + roi[2]]
                 cropped = apply_threshold(cropped, lower_th, upper_th)
-                # cv2.Canny(cropped, 50, 150)
                 diff = cv2.absdiff(cropped, prev_frame)
-
-                # エッジ検出
-                # edges = cv2.Canny(cropped, 50, 150)
-
-                # 差分を累積
                 accumulated_diff += diff.astype(np.float64)
-
-                # Calculate sum of pixel intensities for the frame and append to the list
                 sum_intensity = np.sum(diff)
                 sum_intensities.append(sum_intensity)
-
-                # 前フレームのエッジとの差分を計算
-                # edge_diff = cv2.absdiff(edges, prev_edges)
-
-                # エッジのモーションの量（ピクセル強度の合計）を計算
-                # edge_motion_intensity = np.sum(edge_diff)
-
-                # sum_intensities.append(edge_motion_intensity)
-
                 out.write(diff)
                 prev_frame = cropped
-                # 次のループのために、現在のエッジ画像をprev_edgesに格納
-                # prev_edges = edges
 
+                # Update elapsed and remaining time
                 elapsed_time = time.time() - start_time
                 remaining_time = (total_frames - i) * (elapsed_time / (i + 1))
-
-                # Updating the progress bar and the remaining time.
                 window["-PROGRESS-"].update_bar((i + 1) * 100 / total_frames)
                 window["-TIME-"].update(f"Left processing time: {remaining_time:.2f}s")
 
@@ -286,7 +272,7 @@ def main():
                 "Delta Pixel Intensity (%)": d_sum[:range_frames] * 100,
             }
             df = pd.DataFrame(data)
-            
+
             df.to_csv(results_file_name)
 
             # with pd.ExcelWriter(excel_file_name) as writer:
@@ -301,14 +287,14 @@ def main():
             # 動画全体のCSVの保存
             csv_path = os.path.join(directory, f"{file_name}_accumulated_diff.csv")
             np.savetxt(csv_path, accumulated_diff, delimiter=",", fmt="%f")
-            
+
             # Setting information
             now = datetime.datetime.now()
             set_info = {
                 "ROI": (rectangle1, rectangle2),
                 "Threshold": (lower_th, upper_th),
                 "Video path": video_path,
-                "Analysis date": now.strftime('%Y-%m-%d %H:%M:%S'),
+                "Analysis date": now.strftime("%Y-%m-%d %H:%M:%S"),
             }
             result_json_path = os.path.join(directory, f"{file_name}_setting_info.json")
             # system infoの保存

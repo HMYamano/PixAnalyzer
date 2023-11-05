@@ -64,7 +64,8 @@ setup(
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
     entry_points={
-        'console_scripts': [
-            'pixanalyzer = pixanalyzer.main:main',
-        ],},
+        "console_scripts": [
+            "pixanalyzer = pixanalyzer.main:main",
+        ],
+    },
 )
