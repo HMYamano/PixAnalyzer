@@ -18,12 +18,8 @@ from tqdm import tqdm
 # Import required libraries
 # (Original comment was 'import libs')
 
-if __name__ == "__main__":
-    # Execute when the script is run directly
-    import threshold as thresh
-else:
-    # Import threshold module when the script is used as a module
-    from . import threshold as thresh
+sys.path.append("../pixanalyzer")
+from pixanalyzer.libs import threshold as thresh
 
 
 # Function to display a plot in the GUI
