@@ -1,0 +1,29 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+dynamic = ["version"]
+name = "PixAnalyzer"
+authors = [
+    {name = "Hayato M Yamanouchi", email = "haya.m.yamano.neuro@gmail.com"},
+]
+description = "PixAnalyzer calculates pixel changes and quantifies the overall motion, which cannot be quantified by tracking or object recognition."
+keywords = ["Python", "OpenCV"]
+readme = "README.md"
+license = {file = "LICENSE"}
+classifiers = [
+  # Pick your license as you wish (see also "license" above)
+  "License :: OSI Approved :: MIT License",
+
+  # Specify the Python versions you support here.
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.6",
+  "Programming Language :: Python :: 3.7",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+]
+requires-python = ">= 3.8"
+
+[project.urls]
+Repository = "https://github.com/HMYamano/PixAnalyzer.git"
